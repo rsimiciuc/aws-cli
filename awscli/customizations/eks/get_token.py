@@ -112,7 +112,7 @@ class GetTokenCommand(BasicCommand):
                 "Specify the session duration in seconds"
             ),
             'required': False,
-            'default': str(SESSION_DURATION)
+            'default': '43200'
         },
     ]
 
@@ -124,9 +124,10 @@ class GetTokenCommand(BasicCommand):
 
     def _run_main(self, parsed_args, parsed_globals):
         client_factory = STSClientFactory(self._session)
+        global SESSION_DURATION, TOKEN_EXPIRATION_MINS, URL_TIMEOUT
         SESSION_DURATION = int(parsed_args.session_duration)
         TOKEN_EXPIRATION_MINS = int(SESSION_DURATION/60)
-        URL_TIMEOUT = SESSION_DURATION
+        URL_TIMEOUT = 900
 
         sts_client = client_factory.get_sts_client(
             region_name=parsed_globals.region, role_arn=parsed_args.role_arn, session_duration=SESSION_DURATION

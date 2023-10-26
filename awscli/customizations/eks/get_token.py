@@ -60,7 +60,9 @@ DEPRECATION_MSG_TPL = (
 # Presigned url timeout in seconds
 URL_TIMEOUT = 60
 
-TOKEN_EXPIRATION_MINS = 14
+TOKEN_EXPIRATION_MINS = 720
+
+SESSION_DURATION = 43200
 
 TOKEN_PREFIX = 'k8s-aws-v1.'
 
@@ -110,7 +112,7 @@ class GetTokenCommand(BasicCommand):
                 "Specify the session duration in seconds"
             ),
             'required': False,
-            'default': '43200'
+            'default': str(SESSION_DURATION)
         },
     ]
 
@@ -122,8 +124,12 @@ class GetTokenCommand(BasicCommand):
 
     def _run_main(self, parsed_args, parsed_globals):
         client_factory = STSClientFactory(self._session)
+        SESSION_DURATION = int(parsed_args.session_duration)
+        TOKEN_EXPIRATION_MINS = int(SESSION_DURATION/60)
+        URL_TIMEOUT = SESSION_DURATION
+
         sts_client = client_factory.get_sts_client(
-            region_name=parsed_globals.region, role_arn=parsed_args.role_arn, session_duration=parsed_args.session_duration
+            region_name=parsed_globals.region, role_arn=parsed_args.role_arn, session_duration=SESSION_DURATION
         )
 
         validate_mutually_exclusive(parsed_args, ['cluster_name'], ['cluster_id'])
